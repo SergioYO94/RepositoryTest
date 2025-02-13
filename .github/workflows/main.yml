@@ -6,7 +6,7 @@ on:
 
 jobs:
   test:
-    if: ${{ github.event.pull_request.base.ref == 'devmerge' }}
+    if: ${{ github.event.pull_request.base.ref == 'dev' }}
     runs-on: ubuntu-latest
     steps:
       - name: Debug
