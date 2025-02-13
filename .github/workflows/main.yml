@@ -20,11 +20,11 @@ jobs:
         run: echo "Deploying because PR from B to A was created or updated"
 
       - name: Run deployment script
-       
         run: |
           echo "Starting deployment..."
-          git pull origin
-          git checkout f2
+          git pull origin ${{ github.event.pull_request.head.ref }}
 
+          git checkout ${{ github.event.pull_request.head.ref }}
+          
           git reset --hard HEAD~1
           git push --force
