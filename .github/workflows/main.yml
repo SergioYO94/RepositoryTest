@@ -1,17 +1,23 @@
-name: PR_review
+name: Deploy on PR
 
 on:
-  pull_request_review:
-    types: [submitted, edited]
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - dev
 
 jobs:
-  test:
-    if: ${{ github.event.pull_request.base.ref == 'devmerge' }}
+  deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Debug
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up environment
+        run: echo "Deploying because PR from B to A was created or updated"
+
+      - name: Run deployment script
         run: |
-          echo ${{ github.event_name }}
-          echo ${{ github.ref }}
-          echo ${{ github.event.pull_request.head.ref }}
-          echo ${{ github.event.pull_request.base.ref }}
+          echo "Starting deployment..."
+          # Qui puoi aggiungere i tuoi comandi di deploy
