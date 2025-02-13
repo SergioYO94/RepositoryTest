@@ -1,30 +1,28 @@
-name: Deploy on PR
+name: Reset Merge Commit on A
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [closed]  # Si attiva quando la PR viene chiusa (merged)
     branches:
       - dev
 
 jobs:
-  deploy:
+  reset-merge-on-A:
+    if: github.event.pull_request.merged == true  # Esegui solo se la PR è stata effettivamente mergiata
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Clona l'intera cronologia e tutti i branch
+          fetch-depth: 0  # Necessario per la cronologia completa
+          ref: ${{ github.event.pull_request.head.ref }}
 
-      - name: Set up environment
-        run: echo "Deploying because PR from B to A was created or updated"
-
-      - name: Run deployment script
+      - name: Reset ${{ github.event.pull_request.head.ref }} to state before merge
         run: |
-          echo "Starting deployment..."
-          git pull origin ${{ github.event.pull_request.head.ref }}
-
-          git checkout ${{ github.event.pull_request.head.ref }}
+          git fetch origin
+          git reset --hard origin/${{ github.event.pull_request.head.ref }}  # Ripristina lo stato originale di A senza il merge commit
+          git push --force origin ${{ github.event.pull_request.head.ref }}  # Forza il push per aggiornare A
           
-          git reset --hard HEAD~1
-          git push --force
+      - name: Confirmation log
+        run: echo "Branch ${{ github.event.pull_request.head.ref }} reset to its state before merging into B"
