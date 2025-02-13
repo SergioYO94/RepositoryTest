@@ -1,0 +1,17 @@
+name: PR_review
+
+on:
+  pull_request_review:
+    types: [submitted, edited]
+
+jobs:
+  test:
+    if: ${{ github.event.pull_request.base.ref == 'devmerge' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Debug
+        run: |
+          echo ${{ github.event_name }}
+          echo ${{ github.ref }}
+          echo ${{ github.event.pull_request.head.ref }}
+          echo ${{ github.event.pull_request.base.ref }}
