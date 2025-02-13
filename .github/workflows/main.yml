@@ -22,8 +22,8 @@ jobs:
        
         run: |
           echo "Starting deployment..."
-          git checkout f2
           git pull origin
+          git checkout f2
 
           git reset --hard HEAD~1
           git push --force
