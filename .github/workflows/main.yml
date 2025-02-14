@@ -21,7 +21,7 @@ jobs:
       - name: Reset ${{ github.event.pull_request.head.ref }} to state before merge
         run: |
           git fetch origin
-          git reset --hard origin/${{ github.event.pull_request.head.ref }}  # Ripristina lo stato originale di A senza il merge commit
+          git reset --hard origin/${{ github.event.pull_request.head.ref }}~  # Ripristina lo stato originale di A senza il merge commit
           git push --force origin ${{ github.event.pull_request.head.ref }}  # Forza il push per aggiornare A
           
       - name: Confirmation log
