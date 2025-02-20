@@ -1,17 +1,28 @@
-name: PR_review
+name: Reset Merge Commit on A
 
 on:
-  pull_request_review:
-    types: [submitted, edited]
+  pull_request:
+    types: [closed]  # Si attiva quando la PR viene chiusa (merged)
+    branches:
+      - dev
 
 jobs:
-  test:
-    if: ${{ github.event.pull_request.base.ref == 'devmerge' }}
+  reset-merge-on-A:
+    if: github.event.pull_request.merged == true  # Esegui solo se la PR è stata effettivamente mergiata
     runs-on: ubuntu-latest
+
     steps:
-      - name: Debug
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Necessario per la cronologia completa
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Reset ${{ github.event.pull_request.head.ref }} to state before merge
         run: |
-          echo ${{ github.event_name }}
-          echo ${{ github.ref }}
-          echo ${{ github.event.pull_request.head.ref }}
-          echo ${{ github.event.pull_request.base.ref }}
+          git fetch origin
+          git reset --hard origin/${{ github.event.pull_request.head.ref }}~  # Ripristina lo stato originale di A senza il merge commit
+          git push --force origin ${{ github.event.pull_request.head.ref }}  # Forza il push per aggiornare A
+          
+      - name: Confirmation log
+        run: echo "Branch ${{ github.event.pull_request.head.ref }} reset to its state before merging into B"
