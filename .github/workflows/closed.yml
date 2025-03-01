@@ -2,7 +2,7 @@ name: Deploy on PR
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [closed]
 
 jobs:
   deploy:
@@ -15,20 +15,10 @@ jobs:
         with:
           fetch-depth: 0  # Necessario per la cronologia completa
           ref: ${{ github.event.pull_request.head.ref }}
-      - name: Check Validity
+      - name: Push Force
         shell: pwsh
         run: |
           git fetch origin
-          
-
-
-          #if ((git rev-parse ${{ github.event.pull_request.head.ref }}^@ | Measure-Object).Count -gt 1) {
-          #    Write-Output "HEAD è un commit di merge"
-          #} else {
-          #    Write-Output "HEAD NON è un commit di merge"
-          #    exit -1
-          #}
-
 
           $mergeCommit = git log --oneline --merges --first-parent ${{ github.event.pull_request.head.ref }} --format="%H" | Select-Object -First 1
           $headCommit = git rev-parse ${{ github.event.pull_request.head.ref }}
@@ -37,10 +27,12 @@ jobs:
             Write-Host "Commit di merge trovato."
             if ($mergeCommit -eq $headCommit){
               Write-Host "Il commit di merge trovato è lo stesso della testa di ${{ github.event.pull_request.head.ref }}."
-              Write-Host "Preparazione al push force dopo il merge..."
+              Write-Host "Eseguo il push force..."
+              git reset --hard origin/${{ github.event.pull_request.head.ref }}~  # Ripristina lo stato originale di A senza il merge commit
+              git push --force origin ${{ github.event.pull_request.head.ref }}  # Forza il push per aggiornare A
+              Write-Host "Push Force avvenuto correttamente."
             }else {
-              Write-Host "Il commit di merge non è lo stesso della testa di ${{ github.event.pull_request.head.ref }}."
-              Write-Host "Devo abortire l'operazione in quanto non è un'operazione valida."
+              Write-Host "Qualcosa è andato storto in quanto il workflow di prima doveva bloccare questa casistica."
               exit -1
             }
           }else{
