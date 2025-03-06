@@ -1,0 +1,49 @@
+name: Deploy on PR
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Necessario per la cronologia completa
+          ref: ${{ github.event.pull_request.head.ref }}
+      - name: Check Validity
+        shell: pwsh
+        run: |
+          git fetch origin
+          
+
+
+          #if ((git rev-parse ${{ github.event.pull_request.head.ref }}^@ | Measure-Object).Count -gt 1) {
+          #    Write-Output "HEAD è un commit di merge"
+          #} else {
+          #    Write-Output "HEAD NON è un commit di merge"
+          #    exit -1
+          #}
+
+
+          $mergeCommit = git log --oneline --merges --first-parent ${{ github.event.pull_request.head.ref }} --format="%H" | Select-Object -First 1
+          $headCommit = git rev-parse ${{ github.event.pull_request.head.ref }}
+
+          if ($mergeCommit) {
+            Write-Host "Commit di merge trovato."
+            if ($mergeCommit -eq $headCommit){
+              Write-Host "Il commit di merge trovato è lo stesso della testa di ${{ github.event.pull_request.head.ref }}."
+              Write-Host "Preparazione al push force dopo il merge..."
+            }else {
+              Write-Host "Il commit di merge non è lo stesso della testa di ${{ github.event.pull_request.head.ref }}."
+              Write-Host "Devo abortire l'operazione in quanto non è un'operazione valida."
+              exit -1
+            }
+          }else{
+            Write-Host "Nessun commit di merge rilevato. Proseguo tranquillamente."
+          }
+          
