@@ -19,13 +19,4 @@
       an evil sorceress, and her own childhood to become queen
       of the world.</Description>
    </Book>
-   <Book id="bk103">
-      <Author>Garghentini, Davide</Author>
-      <Title>XML Developer's Guide</Title>
-      <Genre>Computer</Genre>
-      <Price>44.95</Price>
-      <PublishDate>2000-10-01</PublishDate>
-      <Description>An in-depth look at creating applications
-      with XML.</Description>
-   </Book>
 </Catalog>
